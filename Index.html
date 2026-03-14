@@ -236,22 +236,21 @@ function prepararEnvio(){
     .then(r => r.json())
     .then(data => {
         document.getElementById('loading').style.display='none';
-        const res = document.getElementById('resultado');
-        if(data.error){
-            res.textContent = "Error: " + data.error;
-        }else{
-            res.textContent = data.resultado || data.result || JSON.stringify(data, null, 2);
-        }
-        res.style.display='block';
+
+        // 🔥 GUARDAR RESULTADO PARA resultado.html
+        localStorage.setItem("resultado_eatburn", data.resultado || data.result || "Sin datos");
+
+        // 🔥 REDIRIGIR A LA PÁGINA DE RESULTADO
+        window.location.href = "resultado.html";
     })
     .catch(err => {
         document.getElementById('loading').style.display='none';
-        const res = document.getElementById('resultado');
-        res.textContent = "Error de conexión con el servidor.";
-        res.style.display='block';
+
+        // Si hay error, también lo mandamos a resultado.html
+        localStorage.setItem("resultado_eatburn", "Error de conexión con el servidor.");
+        window.location.href = "resultado.html";
     });
 }
-
 // Si hay usuario logueado, ir directo a usuario
 window.addEventListener('load', () => {
     const u = localStorage.getItem('usuario_logueado_eatburn');
