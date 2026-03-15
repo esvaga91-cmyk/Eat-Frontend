@@ -217,26 +217,39 @@ function cerrarSesion(){
 
 // Enviar imagen al backend
 function prepararEnvio(){
-    const form = document.getElementById('bForm');
-    const formData = new FormData(form);
-
+function prepararEnvio(){
     const archivo = document.getElementById('fIn').files[0] || document.getElementById('cIn').files[0];
     if(!archivo){
         return;
     }
-    formData.append('imagen', archivo);
+
+    // FormData manual (soluciona el problema)
+    const formData = new FormData();
+    formData.append("imagen", archivo);
+    formData.append("sexo", document.getElementById("sexo").value);
+    formData.append("peso", document.getElementById("peso").value);
+    formData.append("edad", document.getElementById("edad").value);
+    formData.append("tipo_usuario", document.getElementById("tipo_usuario").value);
 
     document.getElementById('loading').style.display='flex';
     document.getElementById('resultado').style.display='none';
 
     fetch("https://eat-backend-iej5.onrender.com/analizar", {
-    method: "POST",
-    body: formData
-})
+        method: "POST",
+        body: formData
+    })
     .then(r => r.json())
     .then(data => {
         document.getElementById('loading').style.display='none';
-
+        localStorage.setItem("resultado_eatburn", data.resultado || "Sin datos");
+        window.location.href = "resultado.html";
+    })
+    .catch(err => {
+        document.getElementById('loading').style.display='none';
+        localStorage.setItem("resultado_eatburn", "Error de conexión con el servidor.");
+        window.location.href = "resultado.html";
+    });
+}
         // 🔥 GUARDAR RESULTADO PARA resultado.html
         localStorage.setItem("resultado_eatburn", data.resultado || data.result || "Sin datos");
 
