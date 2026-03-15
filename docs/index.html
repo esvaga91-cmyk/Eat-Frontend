@@ -1,1 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Eat & Burn</title>
 
+<style>
+:root{--fuego:linear-gradient(180deg,#ff4500 0%,#ff8c00 50%,#ffcc00 100%);--morado:#6a1b9a;--fondo:#ffdab9;--texto:#3a2a1e}
+body{margin:0;font-family:'Segoe UI',sans-serif;background:var(--fondo);display:flex;flex-direction:column;align-items:center;min-height:100vh;padding-bottom:80px}
+.wrapper{width:90%;max-width:360px;display:flex;flex-direction:column;align-items:center;flex:1}
+.logo{width:130px;border-radius:22px;margin-top:25px;box-shadow:0 10px 25px rgba(0,0,0,0.18)}
+h1{font-size:2.3rem;margin:12px 0;color:#333;text-align:center;font-weight:800}
+.burn{background:var(--fuego);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nota{color:var(--texto);font-size:.95rem;line-height:1.5;margin-bottom:20px;background:rgba(255,255,255,0.45);padding:14px;border-radius:18px;border-left:4px solid #ff4500;width:100%;box-sizing:border-box}
+.btn-main{background:var(--fuego);color:#fff;border:none;padding:12px;border-radius:22px;font-weight:700;font-size:.95rem;width:80%;max-width:240px;margin:10px auto;cursor:pointer;text-shadow:0 1px 2px rgba(0,0,0,0.25);box-shadow:0 4px 12px rgba(255,69,0,0.25);display:block;text-align:center}
+form{width:100%;display:flex;flex-direction:column;align-items:center;margin-top:10px}
+form input{width:100%;height:52px;padding:12px;font-size:1rem;border-radius:18px;border:1px solid #ffcc00;background:#fffdf9;color:var(--morado);box-shadow:inset 0 2px 4px rgba(0,0,0,0.05);box-sizing:border-box;transition:all .25s ease;margin-bottom:10px}
+.select-wrapper{position:relative;width:100%;margin:0}
+.select-wrapper::before{content:"⚧";position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:1.1rem;color:var(--morado);pointer-events:none}
+select{width:100%;height:52px;padding:0 12px 0 40px!important;font-size:1rem;border-radius:18px;border:1px solid #ffcc00;background:#fffdf9;color:var(--morado);box-shadow:inset 0 2px 4px rgba(0,0,0,0.05);box-sizing:border-box;appearance:none;display:flex;align-items:center;margin-bottom:10px}
+.grid-row{display:flex;gap:10px;width:100%;margin-bottom:12px;align-items:center}
+.grid-row>*{flex:1;width:100%}
+.btn-archivo{height:52px!important;padding:0!important;max-width:none;display:flex;justify-content:center;align-items:center}
+.btn-analizar{padding:18px;font-size:1.1rem;border-radius:24px;width:100%}
+.footer-fixed{position:static;width:100%;padding:18px 0;text-align:center;color:#6b4a2d;font-size:.85rem;font-weight:700;background:linear-gradient(to top,rgba(0,0,0,0.05),transparent);margin-top:40px}
+#loading{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,218,185,.92);z-index:9999;flex-direction:column;justify-content:center;align-items:center}
+.spinner{width:60px;height:60px;border:6px solid #eee;border-top:6px solid #ff4500;border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+.error-msg{color:#c62828;font-size:.9rem;margin-top:8px;text-align:center}
+#resultado{margin-top:15px;font-size:.95rem;color:var(--texto);background:rgba(255,255,255,0.7);padding:12px;border-radius:14px;display:none;white-space:pre-wrap}
+.oculto{display:none}
+</style>
+</head>
+
+<body>
+
+<div id="loading">
+    <div class="spinner"></div>
+    <h2 style="color:#ff4500;margin-top:15px">🔥 QUEMANDO GRASA...</h2>
+</div>
+
+<div class="wrapper">
+
+    <img src="img/logo.png" class="logo" alt="Eat & Burn">
+    <h1>EAT & <span class="burn">BURN</span></h1>
+
+    <!-- INICIO -->
+    <div id="pantalla-inicio">
+        <p class="nota">🎯 <b>Objetivo: Adelgazar</b><br>Toma una foto y descubre cuánto ejercicio necesitas para perder peso hoy.</p>
+        <button class="btn-main" onclick="irLogin()">👤 ACCESO USUARIO</button>
+        <button class="btn-main" onclick="irInvitado()">🕶️ MODO INVITADO</button>
+        <button style="color:var(--morado);text-decoration:none;font-weight:700;margin-top:10px;font-size:.9rem;background:none;border:none;cursor:pointer" onclick="irRegistro()">¿Eres nuevo? Regístrate</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="pantalla-login" class="oculto">
+        <p class="nota">🔐 <b>Entrada Segura</b><br>Accede para revisar tu progreso y mantener el déficit.</p>
+
+        <form onsubmit="hacerLogin(event)">
+            <input type="text" id="login-username" placeholder="👤 Usuario">
+            <input type="password" id="login-password" placeholder="🔒 Contraseña">
+            <button type="submit" class="btn-main">ENTRAR</button>
+        </form>
+
+        <p id="login-error" class="error-msg" style="display:none"></p>
+
+        <button style="color:var(--morado);text-decoration:none;margin-top:15px;font-weight:700;background:none;border:none;cursor:pointer" onclick="irInicio()">← VOLVER</button>
+    </div>
+
+    <!-- REGISTRO -->
+    <div id="pantalla-registro" class="oculto">
+        <p class="nota">📝 <b>Nuevo Perfil</b><br>Crea tu cuenta para guardar tus comidas y entrenamientos.</p>
+
+        <form onsubmit="hacerRegistro(event)">
+            <input type="text" id="reg-username" placeholder="👤 Nombre de usuario">
+            <input type="email" id="reg-email" placeholder="📧 Correo electrónico">
+            <input type="password" id="reg-password" placeholder="🔒 Elige contraseña">
+            <button type="submit" class="btn-main">CREAR CUENTA</button>
+        </form>
+
+        <p id="reg-error" class="error-msg" style="display:none"></p>
+
+        <button style="color:var(--morado);text-decoration:none;margin-top:15px;font-weight:700;background:none;border:none;cursor:pointer" onclick="irInicio()">← VOLVER</button>
+    </div>
+
+    <!-- INVITADO / USUARIO (ANÁLISIS) -->
+    <div id="pantalla-analisis" class="oculto">
+        <p class="nota" id="texto-analisis">⚖️ <b>Personaliza el cálculo</b><br>Indica tus datos para que la IA sea más precisa.</p>
+
+        <form id="bForm">
+            <input type="hidden" id="tipo_usuario" name="tipo_usuario" value="invitado">
+
+            <div class="grid-row">
+                <div class="select-wrapper">
+                    <select name="sexo" id="sexo">
+                        <option value="">Sexo</option>
+                        <option value="M">Masculino</option>
+                        <option value="F">Femenino</option>
+                    </select>
+                </div>
+
+                <button type="button" class="btn-main btn-archivo" onclick="document.getElementById('fIn').click()">📎 ARCHIVO</button>
+            </div>
+
+            <div class="grid-row">
+                <input type="number" name="peso" id="peso" placeholder="⚖️ Peso (kg)">
+                <input type="number" name="edad" id="edad" placeholder="🎂 Edad">
+            </div>
+
+            <input type="file" name="imagen_archivo" id="fIn" style="display:none" accept="image/*" onchange="prepararEnvio()">
+            <input type="file" name="imagen_camara" id="cIn" accept="image/*" capture="camera" style="display:none" onchange="prepararEnvio()">
+
+            <button type="button" class="btn-main btn-analizar" onclick="document.getElementById('cIn').click()">📸 ANALIZAR PLATO</button>
+        </form>
+
+        <div id="resultado"></div>
+
+        <button style="color:var(--morado);text-decoration:none;margin-top:20px;font-weight:700;background:none;border:none;cursor:pointer" onclick="cerrarSesion()">← SALIR</button>
+    </div>
+
+</div>
+
+<div class="footer-fixed">
+    "In corpore sano con la IA"<br>
+    © 2026 Eat & Burn
+</div>
+
+<script>
+// CONFIGURA AQUÍ LA URL DE TU BACKEND EN RENDER
+const BACKEND_URL = "https://eat-backend-iej5.onrender.com/analizar";
+
+function mostrarPantalla(id){
+    document.getElementById('pantalla-inicio').classList.add('oculto');
+    document.getElementById('pantalla-login').classList.add('oculto');
+    document.getElementById('pantalla-registro').classList.add('oculto');
+    document.getElementById('pantalla-analisis').classList.add('oculto');
+    document.getElementById(id).classList.remove('oculto');
+}
+
+function irInicio(){
+    mostrarPantalla('pantalla-inicio');
+}
+
+function irLogin(){
+    mostrarPantalla('pantalla-login');
+}
+
+function irRegistro(){
+    mostrarPantalla('pantalla-registro');
+}
+
+function irInvitado(){
+    document.getElementById('tipo_usuario').value = 'invitado';
+    document.getElementById('texto-analisis').innerHTML = '⚖️ <b>Personaliza el cálculo</b><br>Indica tus datos para que la IA sea más precisa.';
+    mostrarPantalla('pantalla-analisis');
+}
+
+function irUsuario(){
+    document.getElementById('tipo_usuario').value = 'usuario';
+    document.getElementById('texto-analisis').innerHTML = '👤 <b>Modo usuario</b><br>Analiza tus platos y mantén tu progreso.';
+    mostrarPantalla('pantalla-analisis');
+}
+
+// Registro simple con localStorage
+function hacerRegistro(e){
+    e.preventDefault();
+    const u = document.getElementById('reg-username').value.trim();
+    const em = document.getElementById('reg-email').value.trim();
+    const p = document.getElementById('reg-password').value.trim();
+    const err = document.getElementById('reg-error');
+
+    if(!u || !em || !p){
+        err.textContent = "Rellena todos los campos.";
+        err.style.display = "block";
+        return;
+    }
+
+    const usuarios = JSON.parse(localStorage.getItem('usuarios_eatburn') || '{}');
+    if(usuarios[u]){
+        err.textContent = "Ese usuario ya existe.";
+        err.style.display = "block";
+        return;
+    }
+
+    usuarios[u] = {email: em, password: p};
+    localStorage.setItem('usuarios_eatburn', JSON.stringify(usuarios));
+
+    err.style.display = "none";
+    irLogin();
+}
+
+// Login simple con localStorage
+function hacerLogin(e){
+    e.preventDefault();
+    const u = document.getElementById('login-username').value.trim();
+    const p = document.getElementById('login-password').value.trim();
+    const err = document.getElementById('login-error');
+
+    const usuarios = JSON.parse(localStorage.getItem('usuarios_eatburn') || '{}');
+
+    if(!usuarios[u] || usuarios[u].password !== p){
+        err.textContent = "Usuario o contraseña incorrectos.";
+        err.style.display = "block";
+        return;
+    }
+
+    err.style.display = "none";
+    localStorage.setItem('usuario_logueado_eatburn', u);
+    irUsuario();
+}
+
+function cerrarSesion(){
+    localStorage.removeItem('usuario_logueado_eatburn');
+    irInicio();
+}
+
+// Enviar imagen al backend
+function prepararEnvio(){
+    const form = document.getElementById('bForm');
+    const formData = new FormData(form);
+
+    const archivo = document.getElementById('fIn').files[0] || document.getElementById('cIn').files[0];
+    if(!archivo){
+        return;
+    }
+    formData.append('imagen', archivo);
+
+    document.getElementById('loading').style.display='flex';
+    document.getElementById('resultado').style.display='none';
+
+    fetch(BACKEND_URL, {
+        method: "POST",
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        document.getElementById('loading').style.display='none';
+
+        // 🔥 GUARDAR RESULTADO PARA resultado.html
+        localStorage.setItem("resultado_eatburn", data.resultado || data.result || "Sin datos");
+
+        // 🔥 REDIRIGIR A LA PÁGINA DE RESULTADO
+        window.location.href = "resultado.html";
+    })
+    .catch(err => {
+        document.getElementById('loading').style.display='none';
+
+        // Si hay error, también lo mandamos a resultado.html
+        localStorage.setItem("resultado_eatburn", "Error de conexión con el servidor.");
+        window.location.href = "resultado.html";
+    });
+}
+// Si hay usuario logueado, ir directo a usuario
+window.addEventListener('load', () => {
+    const u = localStorage.getItem('usuario_logueado_eatburn');
+    if(u){
+        irUsuario();
+    }else{
+        irInicio();
+    }
+});
+</script>
+
+</body>
+</html>
