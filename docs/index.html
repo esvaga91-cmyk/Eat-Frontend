@@ -229,10 +229,10 @@ function prepararEnvio(){
     document.getElementById('loading').style.display='flex';
     document.getElementById('resultado').style.display='none';
 
-    fetch(BACKEND_URL, {
-        method: "POST",
-        body: formData
-    })
+    fetch("https://eat-backend-iej5.onrender.com/analizar", {
+    method: "POST",
+    body: formData
+})
     .then(r => r.json())
     .then(data => {
         document.getElementById('loading').style.display='none';
