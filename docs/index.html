@@ -8,81 +8,98 @@
 </head>
 <body>
 
-<div id="loading" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,218,185,.92); z-index:9999; flex-direction:column; justify-content:center; align-items:center;">
-    <div class="spinner" style="width:60px; height:60px; border:6px solid #eee; border-top:6px solid #FF8C00; border-radius:50%; animation:spin 1s linear infinite;"></div>
-    <h2 style="color:#FF4500; margin-top:15px; font-family:sans-serif;">🔥 QUEMANDO GRASA...</h2>
+<!-- LOADING -->
+<div id="loading">
+    <div class="spinner"></div>
+    <h2 class="texto-morado-acento">🔥 QUEMANDO GRASA...</h2>
 </div>
 
 <header>
     <img src="img/logo.png" class="logo-principal" alt="Eat & Burn">
-    <h1 class="titulo-principal"><span class="negro">EAT</span> <span class="naranja-neon">& BURN</span></h1>
+    <h1 class="titulo-principal">
+        <span class="negro">EAT</span> <span class="naranja-neon">& BURN</span>
+    </h1>
 </header>
 
 <main class="wrapper">
+
+    <!-- PANTALLA INICIO -->
     <div id="pantalla-inicio">
-        <p class="texto-gris" style="font-style: italic; margin-bottom: 25px;">Tu nutrición inteligente, a un solo clic.</p>
+        <p class="texto-gris" style="font-style: italic; margin-bottom: 25px;">
+            Tu nutrición inteligente, a un solo clic.
+        </p>
+
         <button class="btn-naranja" onclick="irLogin()">👤 USUARIO</button>
         <button class="btn-naranja" onclick="irInvitado()">🕶️ INVITADO</button>
+
         <p class="texto-gris" style="margin-top: 25px;">
-            ¿No tienes cuenta? <button onclick="irRegistro()" class="link-morado-bold" style="background:none; border:none; cursor:pointer; font-size:inherit;">Regístrate</button>
+            ¿No tienes cuenta?
+            <button onclick="irRegistro()" class="link-morado-bold" style="background:none; border:none; cursor:pointer;">
+                Regístrate
+            </button>
         </p>
     </div>
 
-    <div id="pantalla-login" class="oculto" style="display:none;">
+    <!-- LOGIN -->
+    <div id="pantalla-login" class="oculto">
         <h2 class="texto-morado-acento">Iniciar Sesión</h2>
+
         <form onsubmit="hacerLogin(event)" style="width:100%; display:flex; flex-direction:column; align-items:center;">
             <input type="text" id="login-username" placeholder="Usuario" class="input-estilo" required>
             <input type="password" id="login-password" placeholder="Contraseña" class="input-estilo" required>
             <button type="submit" class="btn-naranja">ENTRAR</button>
         </form>
-        <p id="login-error" class="error-msg" style="display:none; color:red;"></p>
+
+        <p id="login-error" class="error-msg texto-gris" style="display:none;"></p>
         <button onclick="irInicio()" class="texto-gris" style="background:none; border:none; margin-top:20px;">← Volver</button>
     </div>
 
-    <div id="pantalla-registro" class="oculto" style="display:none;">
+    <!-- REGISTRO -->
+    <div id="pantalla-registro" class="oculto">
         <h2 class="texto-morado-acento">Crear Cuenta</h2>
+
         <form onsubmit="hacerRegistro(event)" style="width:100%; display:flex; flex-direction:column; align-items:center;">
             <input type="text" id="reg-username" placeholder="Nombre de usuario" class="input-estilo" required>
             <input type="email" id="reg-email" placeholder="Correo electrónico" class="input-estilo" required>
             <input type="password" id="reg-password" placeholder="Contraseña" class="input-estilo" required>
             <button type="submit" class="btn-naranja">REGISTRARME</button>
         </form>
+
         <button onclick="irInicio()" class="texto-gris" style="background:none; border:none; margin-top:20px;">← Volver</button>
     </div>
 
-    <div id="pantalla-analisis" class="oculto" style="display:none;">
-        <p class="texto-gris" id="texto-analisis" style="margin-bottom:20px;">Personaliza el cálculo para la IA.</p>
+    <!-- ANALISIS -->
+    <div id="pantalla-analisis" class="oculto">
+        <p class="texto-gris" id="texto-analisis">Personaliza el cálculo para la IA.</p>
+
         <form id="bForm" style="width:100%; display:flex; flex-direction:column; align-items:center;">
             <input type="hidden" id="tipo_usuario" value="invitado">
+
             <select id="sexo" class="input-estilo">
                 <option value="">Sexo</option>
                 <option value="M">Masculino</option>
                 <option value="F">Femenino</option>
             </select>
+
             <input type="number" id="peso" placeholder="Peso (kg)" class="input-estilo">
             <input type="number" id="edad" placeholder="Edad" class="input-estilo">
-            
+
             <input type="file" id="fIn" style="display:none" accept="image/*" onchange="prepararEnvio()">
             <input type="file" id="cIn" style="display:none" accept="image/*" capture="camera" onchange="prepararEnvio()">
 
             <button type="button" class="btn-naranja" onclick="document.getElementById('cIn').click()">📸 ABRIR CÁMARA</button>
             <button type="button" class="btn-naranja" onclick="document.getElementById('fIn').click()">📎 PEGAR ARCHIVO</button>
         </form>
+
         <button onclick="cerrarSesion()" class="texto-gris" style="background:none; border:none; margin-top:20px;">← Salir</button>
     </div>
+
 </main>
 
 <footer>
     <p class="texto-morado-footer">Mens Sana in Corpore Sano con la IA</p>
     <p class="copy-style">© 2026 Eat & Burn</p>
 </footer>
-
-<style>
-@keyframes spin { 
-    0% { transform: rotate(0deg); } 
-    100% { transform: rotate(360deg); } 
-}
-</style>
 
 <script>
 const BACKEND_URL = "https://eat-backend-production-a004.up.railway.app/analizar";
