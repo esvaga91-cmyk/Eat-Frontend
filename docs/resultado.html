@@ -60,16 +60,52 @@ h1{
 </div>
 
 <script>
-// Cargar resultado desde localStorage
-const data = localStorage.getItem("resultado_eatburn");
+const raw = localStorage.getItem("resultado_eatburn");
 
-if(data){
-    document.getElementById("resultado").textContent = data;
-}else{
+if (!raw) {
     document.getElementById("resultado").textContent = "No hay resultado disponible.";
+} else {
+    let data = null;
+
+    try {
+        data = JSON.parse(raw);
+    } catch {
+        document.getElementById("resultado").textContent = raw;
+    }
+
+    if (!data) return;
+
+    // Si NO es comida
+    if (data.es_comida === false) {
+        document.getElementById("resultado").innerHTML = `
+            <p>${data.mensaje}</p>
+        `;
+        return;
+    }
+
+    // Si SÍ es comida
+    document.getElementById("resultado").innerHTML = `
+        <h2>${data.comida_detectada}</h2>
+        <p>${data.descripcion}</p>
+
+        <p><strong>Calorías:</strong> ${data.calorias_estimadas} kcal</p>
+
+        <h3>Macros</h3>
+        <ul>
+            <li>Proteínas: ${data.macros.proteinas}</li>
+            <li>Carbohidratos: ${data.macros.carbohidratos}</li>
+            <li>Grasas: ${data.macros.grasas}</li>
+            <li>Azúcar: ${data.macros.azucar}</li>
+            <li>Fibra: ${data.macros.fibra}</li>
+        </ul>
+
+        <h3>Ejercicio recomendado</h3>
+        <pre style="font-size:14px; white-space:pre-wrap;">
+${data.tabla_ejercicios}
+        </pre>
+    `;
 }
 
-// Volver al index
 function volver(){
     window.location.href = "index.html";
 }
