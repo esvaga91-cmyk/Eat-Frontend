@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -173,12 +173,12 @@ function prepararEnvio(){
     .then(r => r.json())
     .then(data => {
         document.getElementById('loading').style.display='none';
-        localStorage.setItem("resultado_eatburn", data.resultado || data.result || "Sin datos");
+        localStorage.setItem("resultado_eatburn", JSON.stringify(data));
         window.location.href = "resultado.html";
     })
     .catch(err => {
         document.getElementById('loading').style.display='none';
-        localStorage.setItem("resultado_eatburn", "Error de conexión.");
+        localStorage.setItem("resultado_eatburn", JSON.stringify({error:"Error de conexión"}));
         window.location.href = "resultado.html";
     });
 }
