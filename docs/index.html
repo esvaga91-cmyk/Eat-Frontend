@@ -170,9 +170,10 @@ function prepararEnvio(){
 
     document.getElementById('loading').style.display='flex';
 
-    fetch(BACKEND_URL, { method: "POST", body: formData })
-    .then(r => r.json())
-    .then(data => {
+    fetch("https://eat-backend-iej5.onrender.com/analizar", {
+    method: "POST",
+    body: formData
+})
         document.getElementById('loading').style.display='none';
         localStorage.setItem("resultado_eatburn", JSON.stringify(data));
         window.location.href = "resultado.html";
