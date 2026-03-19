@@ -15,36 +15,68 @@ body{
     align-items:center;
     padding:20px;
 }
+
 .wrapper{
     width:90%;
-    max-width:360px;
+    max-width:380px;
     background:white;
-    padding:20px;
-    border-radius:18px;
-    box-shadow:0 8px 20px rgba(0,0,0,0.15);
+    padding:25px;
+    border-radius:20px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.18);
+    animation: fadeIn 0.4s ease;
 }
+
+@keyframes fadeIn{
+    from{opacity:0; transform:translateY(10px);}
+    to{opacity:1; transform:translateY(0);}
+}
+
 h1{
     text-align:center;
     color:#ff4500;
-    font-size:1.8rem;
+    font-size:2rem;
+    margin-bottom:10px;
 }
+
+.section-title{
+    margin-top:20px;
+    font-size:1.2rem;
+    color:#ff4500;
+    font-weight:700;
+}
+
 #resultado{
     margin-top:15px;
     font-size:1rem;
     color:#3a2a1e;
     white-space:pre-wrap;
 }
+
+.card{
+    background:#fff7ee;
+    padding:15px;
+    border-radius:14px;
+    margin-top:10px;
+    border-left:5px solid #ff8c00;
+}
+
+ul{
+    padding-left:20px;
+}
+
 .btn{
-    margin-top:20px;
+    margin-top:25px;
     background:linear-gradient(180deg,#ff4500 0%,#ff8c00 50%,#ffcc00 100%);
     color:white;
-    padding:12px;
+    padding:14px;
     border:none;
     border-radius:18px;
     font-weight:700;
     width:100%;
     cursor:pointer;
     text-align:center;
+    font-size:1.1rem;
+    box-shadow:0 4px 10px rgba(0,0,0,0.2);
 }
 </style>
 </head>
@@ -52,7 +84,7 @@ h1{
 <body>
 
 <div class="wrapper">
-    <h1>Resultado</h1>
+    <h1>🍽️ Resultado</h1>
 
     <div id="resultado">Cargando...</div>
 
@@ -61,50 +93,76 @@ h1{
 
 <script>
 const raw = localStorage.getItem("resultado_eatburn");
+const box = document.getElementById("resultado");
 
 if (!raw) {
-    document.getElementById("resultado").textContent = "No hay resultado disponible.";
-} else {
-    let data = null;
-
-    try {
-        data = JSON.parse(raw);
-    } catch {
-        document.getElementById("resultado").textContent = raw;
-    }
-
-    if (!data) return;
-
-    // Si NO es comida
-    if (data.es_comida === false) {
-        document.getElementById("resultado").innerHTML = `
-            <p>${data.mensaje}</p>
-        `;
-        return;
-    }
-
-    // Si SÍ es comida
-    document.getElementById("resultado").innerHTML = `
-        <h2>${data.comida_detectada}</h2>
-        <p>${data.descripcion}</p>
-
-        <p><strong>Calorías:</strong> ${data.calorias_estimadas} kcal</p>
-
-        <h3>Macros</h3>
-        <ul>
-            <li>Proteínas: ${data.macros.proteinas}</li>
-            <li>Carbohidratos: ${data.macros.carbohidratos}</li>
-            <li>Grasas: ${data.macros.grasas}</li>
-            <li>Azúcar: ${data.macros.azucar}</li>
-            <li>Fibra: ${data.macros.fibra}</li>
-        </ul>
-
-        <h3>Ejercicio recomendado</h3>
-        <pre style="font-size:14px; white-space:pre-wrap;">
-${data.tabla_ejercicios}
-        </pre>
-    `;
+    box.textContent = "No hay resultado disponible.";
+    return;
 }
+
+let data = null;
+try {
+    data = JSON.parse(raw);
+} catch {
+    box.textContent = raw;
+    return;
+}
+
+// Si Groq devolvió un error
+if (data.error) {
+    box.innerHTML = `
+        <div class="card">
+            <strong>⚠️ Error:</strong> ${data.error}
+        </div>
+    `;
+    return;
+}
+
+// Si NO es comida
+if (data.es_comida === false) {
+    box.innerHTML = `
+        <div class="card">
+            <strong>ℹ️ No se detectó comida:</strong><br>
+            ${data.mensaje || "La imagen no contiene alimentos."}
+        </div>
+    `;
+    return;
+}
+
+// Normalizar claves
+const comida = data.comida_detectada || data.food_detected || "Comida detectada";
+const descripcion = data.descripcion || data.description || "";
+const calorias = data.calorias_estimadas || data.calories || "N/D";
+const macros = data.macros || data.macronutrients || {};
+const ejercicios = data.tabla_ejercicios || data.exercise_table || "No disponible";
+
+box.innerHTML = `
+    <div class="card">
+        <h2>🍛 ${comida}</h2>
+        <p>${descripcion}</p>
+    </div>
+
+    <div class="section-title">🔥 Calorías</div>
+    <div class="card">
+        <p><strong>${calorias} kcal</strong></p>
+    </div>
+
+    <div class="section-title">⚖️ Macros</div>
+    <div class="card">
+        <ul>
+            <li>Proteínas: ${macros.proteinas || macros.protein || "N/D"}</li>
+            <li>Carbohidratos: ${macros.carbohidratos || macros.carbs || "N/D"}</li>
+            <li>Grasas: ${macros.grasas || macros.fat || "N/D"}</li>
+            <li>Azúcar: ${macros.azucar || macros.sugar || "N/D"}</li>
+            <li>Fibra: ${macros.fibra || macros.fiber || "N/D"}</li>
+        </ul>
+    </div>
+
+    <div class="section-title">🏃 Ejercicio recomendado</div>
+    <div class="card">
+        <pre style="font-size:14px; white-space:pre-wrap;">${ejercicios}</pre>
+    </div>
+`;
 
 function volver(){
     window.location.href = "index.html";
