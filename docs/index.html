@@ -105,6 +105,44 @@
 /* 🔥 DOMINIO CORREGIDO 🔥 */
 const BACKEND_URL = "https://eat-backend-iej5.onrender.com";
 
+/* ⭐ COMPRESIÓN DE IMAGEN ⭐ */
+async function comprimirImagen(archivo) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(archivo);
+
+        reader.onload = (e) => {
+            const img = new Image();
+            img.src = e.target.result;
+
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+
+                const MAX_WIDTH = 1024;
+                let width = img.width;
+                let height = img.height;
+
+                if (width > MAX_WIDTH) {
+                    height = height * (MAX_WIDTH / width);
+                    width = MAX_WIDTH;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                canvas.toBlob(
+                    (blob) => resolve(blob),
+                    'image/jpeg',
+                    0.7
+                );
+            };
+        };
+    });
+}
+
 function mostrarPantalla(id){
     document.getElementById('pantalla-inicio').style.display = 'none';
     document.getElementById('pantalla-login').style.display = 'none';
@@ -157,18 +195,24 @@ function cerrarSesion(){
     irInicio();
 }
 
-function prepararEnvio(){
-    const archivo = document.getElementById('fIn').files[0] || document.getElementById('cIn').files[0];
-    if(!archivo) return;
+/* ⭐ FUNCIÓN PRINCIPAL DE ENVÍO ⭐ */
+async function prepararEnvio(){
+    const archivoOriginal = document.getElementById('fIn').files[0] 
+                         || document.getElementById('cIn').files[0];
+
+    if(!archivoOriginal) return;
+
+    document.getElementById('loading').style.display='flex';
+
+    /* 🔥 COMPRESIÓN ANTES DE ENVIAR 🔥 */
+    const imagenComprimida = await comprimirImagen(archivoOriginal);
 
     const formData = new FormData();
-    formData.append("imagen", archivo);
+    formData.append("imagen", imagenComprimida, "comida.jpg");
     formData.append("sexo", document.getElementById("sexo").value);
     formData.append("peso", document.getElementById("peso").value);
     formData.append("edad", document.getElementById("edad").value);
     formData.append("tipo_usuario", document.getElementById("tipo_usuario").value);
-
-    document.getElementById('loading').style.display='flex';
 
     fetch(`${BACKEND_URL}/analizar`, {
         method: "POST",
